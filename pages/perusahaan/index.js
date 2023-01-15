@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/router";
 import { PieChart } from "react-minimal-pie-chart";
@@ -9,11 +9,44 @@ import Footer from "../../components/Footer";
 import Pagination from "../../components/Pagination";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchPerusahaan,
+  setPage,
+  setSearch,
+} from "../../redux/perusahaan/actions";
+import { fetchDashboard } from "../../redux/dashboard/actions";
+import { destroy } from "../../services/perusahaan";
 
 export default function Perusahaan() {
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  const onDelete = () => {
+  const { allData, search, page, totalPage } = useSelector(
+    (state) => state.perusahaanReducers
+  );
+  const { registered, notRegistered } = useSelector(
+    (state) => state.dashboardReducers
+  );
+
+  const handlePrevious = () => {
+    dispatch(setPage(page <= 1 ? 1 : page - 1));
+  };
+
+  const handleNext = () => {
+    dispatch(setPage(page === totalPage ? totalPage : page + 1));
+  };
+
+  const handleChangeSearchBox = (event) => {
+    dispatch(setSearch(event.target.value));
+  };
+
+  useEffect(() => {
+    dispatch(fetchPerusahaan());
+    dispatch(fetchDashboard());
+  }, [dispatch, page, search]);
+
+  const onDelete = (id) => {
     Swal.fire({
       title: "Hapus data?",
       text: "Data yang telah dihapus tidak dapat dikembalikan!",
@@ -25,36 +58,53 @@ export default function Perusahaan() {
       cancelButtonText: "Batal",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        alert("Sukses");
+        const response = await destroy(id);
+        if (response?.data?.statusCode === 200) {
+          Swal.fire({
+            icon: "success",
+            title: "Sukses",
+            text: "Berhasil menghapus data perusahaan.",
+          });
+          dispatch(fetchPerusahaan());
+          dispatch(fetchDashboard());
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `${
+              response?.data?.message ||
+              "Nampaknya terjadi kesalahan pada API, silahkan hubungi teknisi Anda."
+            }`,
+          });
+        }
       }
     });
   };
 
   const columns = [
     {
-      name: "No",
+      name: "ID",
       selector: (row) => row.id,
       sortable: true,
-      width: "5rem",
     },
     {
       name: "Jenis Usaha",
-      selector: (row) => row.jenisUsaha,
+      selector: (row) => row.type,
       sortable: true,
     },
     {
       name: "Nama Perusahaan",
-      selector: (row) => row.namaPerusahaan,
+      selector: (row) => row.name,
       sortable: true,
     },
     {
       name: "Lokasi",
-      selector: (row) => row.lokasi,
+      selector: (row) => row.location,
       sortable: false,
     },
     {
       name: "Terdaftar",
-      selector: (row) => row.isTerdaftar,
+      selector: (row) => row.isRegistered,
       sortable: true,
     },
     {
@@ -64,288 +114,86 @@ export default function Perusahaan() {
     },
   ];
 
-  const data = [
-    {
-      id: 1,
-      jenisUsaha: "Distributor",
-      namaPerusahaan: "PT Sucaco",
-      lokasi: (
-        <a href="#" className="underline text-blue-400">
-          Lihat
-        </a>
-      ),
-      isTerdaftar: "Sudah",
-      action: (
-        <div className="flex flex-row space-x-2">
-          <Link href={`/perusahaan/123/detail`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
+  const data =
+    allData?.length > 0
+      ? allData?.map((value) => ({
+          id: value?.id,
+          type: value?.type,
+          name: value?.name,
+          location: value?.location ? (
+            <a
+              href={value?.location}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-400"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </Link>
+              Lihat
+            </a>
+          ) : (
+            "-"
+          ),
+          isRegistered: value?.isRegistered,
+          action: (
+            <div className="flex flex-row space-x-2">
+              <Link href={`/perusahaan/${value?.id}/detail`}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-4 h-4 cursor-pointer"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </Link>
 
-          <Link href={`/perusahaan/123/ubah`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-              />
-            </svg>
-          </Link>
+              <Link href={`/perusahaan/${value?.id}/ubah`}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-4 h-4 cursor-pointer"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                  />
+                </svg>
+              </Link>
 
-          <div onClick={() => onDelete()}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-              />
-            </svg>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 2,
-      jenisUsaha: "Keuangan",
-      namaPerusahaan: "PT Bank Mandiri",
-      lokasi: (
-        <a href="#" className="underline text-blue-400">
-          Lihat
-        </a>
-      ),
-      isTerdaftar: "Belum",
-      action: (
-        <div className="flex flex-row space-x-2">
-          <Link href={`/perusahaan/123/detail`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </Link>
-
-          <Link href={`/perusahaan/123/ubah`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-              />
-            </svg>
-          </Link>
-
-          <div onClick={() => onDelete()}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-              />
-            </svg>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 3,
-      jenisUsaha: "Distributor",
-      namaPerusahaan: "PT Sucaco",
-      lokasi: (
-        <a href="#" className="underline text-blue-400">
-          Lihat
-        </a>
-      ),
-      isTerdaftar: "Sudah",
-      action: (
-        <div className="flex flex-row space-x-2">
-          <Link href={`/perusahaan/123/detail`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </Link>
-
-          <Link href={`/perusahaan/123/ubah`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-              />
-            </svg>
-          </Link>
-
-          <div onClick={() => onDelete()}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-              />
-            </svg>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 4,
-      jenisUsaha: "Keuangan",
-      namaPerusahaan: "PT Bank Mandiri",
-      lokasi: (
-        <a href="#" className="underline text-blue-400">
-          Lihat
-        </a>
-      ),
-      isTerdaftar: "Belum",
-      action: (
-        <div className="flex flex-row space-x-2">
-          <Link href={`/perusahaan/123/detail`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </Link>
-
-          <Link href={`/perusahaan/123/ubah`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-              />
-            </svg>
-          </Link>
-
-          <div onClick={() => onDelete()}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 cursor-pointer"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-              />
-            </svg>
-          </div>
-        </div>
-      ),
-    },
-  ];
+              <div onClick={() => onDelete(value?.id)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-4 h-4 cursor-pointer"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                  />
+                </svg>
+              </div>
+            </div>
+          ),
+        }))
+      : [];
 
   return (
     <>
@@ -361,10 +209,14 @@ export default function Perusahaan() {
             <div className="w-1/2 h-1/2 md:w-1/6 md:h-1/6">
               <PieChart
                 data={[
-                  { title: "Terdaftar", value: 3, color: "#4BB543" },
+                  {
+                    title: "Terdaftar",
+                    value: registered,
+                    color: "#4BB543",
+                  },
                   {
                     title: "Belum Terdaftar",
-                    value: 2,
+                    value: notRegistered,
                     color: "#E50914",
                   },
                 ]}
@@ -386,8 +238,10 @@ export default function Perusahaan() {
               />
             </div>
             <div className="my-4 text-center">
-              <p className="text-[#4BB543]">Total Terdaftar : 0</p>
-              <p className="text-[#E50914]">Total Belum Terdaftar : 0</p>
+              <p className="text-[#4BB543]">Total Terdaftar : {registered}</p>
+              <p className="text-[#E50914]">
+                Total Belum Terdaftar : {notRegistered}
+              </p>
             </div>
           </div>
           <div>
@@ -416,38 +270,50 @@ export default function Perusahaan() {
                 </div>
               </button>
 
-              <label htmlFor="simple-search" className="sr-only">
-                Search
-              </label>
-              <div className="relative w-1/2 md:w-1/4">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg
-                    aria-hidden="true"
-                    className="w-5 h-5 text-gray-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  id="simple-search"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
-                  placeholder="Search"
-                  required
-                />
-              </div>
+              {allData?.length > 0 && (
+                <>
+                  <label htmlFor="simple-search" className="sr-only">
+                    Search
+                  </label>
+                  <div className="relative w-1/2 md:w-1/4">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <svg
+                        aria-hidden="true"
+                        className="w-5 h-5 text-gray-500"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                          clipRule="evenodd"
+                        ></path>
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
+                      placeholder="Jenis Usaha / Nama Perusahaan"
+                      onChange={handleChangeSearchBox}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             <DataTable columns={columns} data={data} />
 
-            <Pagination />
+            {allData?.length > 0 && (
+              <Pagination
+                page={page}
+                totalPage={totalPage}
+                handleNext={handleNext}
+                handlePrevious={handlePrevious}
+                disabledNext={page === totalPage ? true : false}
+                disabledPrevious={page <= 1 ? true : false}
+              />
+            )}
           </div>
         </Content>
       </div>
@@ -455,4 +321,19 @@ export default function Perusahaan() {
       <Footer />
     </>
   );
+}
+
+export async function getServerSideProps({ req }) {
+  const { tk } = req.cookies;
+  if (!tk)
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+
+  return {
+    props: {},
+  };
 }

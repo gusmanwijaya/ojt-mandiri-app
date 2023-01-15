@@ -1,12 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../../components/Navbar";
 import Header from "../../../components/Header";
 import Content from "../../../components/Content";
 import Footer from "../../../components/Footer";
+import Swal from "sweetalert2";
+import { create } from "../../../services/product";
 
-export default function TambahProdukPerusahaan() {
+export default function TambahProdukPerusahaan({ paramsId }) {
   const router = useRouter();
+
+  const [form, setForm] = useState({
+    name: "",
+    companyId: paramsId,
+  });
+
+  const handleCreate = async () => {
+    if (form?.name !== "") {
+      const response = await create(paramsId, form);
+      if (response?.data?.statusCode === 201) {
+        router.replace(`/perusahaan/${paramsId}/detail`);
+        Swal.fire({
+          icon: "success",
+          title: "Sukses",
+          text: "Berhasil menambahkan data produk.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text:
+            response?.data?.message ||
+            "Nampaknya terjadi kesalahan pada API, silahkan hubungi teknisi Anda.",
+        });
+      }
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Nama produk tidak boleh kosong.",
+      });
+    }
+  };
 
   return (
     <>
@@ -33,16 +68,19 @@ export default function TambahProdukPerusahaan() {
                     <div className="grid grid-cols-6 gap-6">
                       <div className="col-span-6">
                         <label
-                          htmlFor="produk"
+                          htmlFor="name"
                           className="block text-sm font-medium text-gray-700"
                         >
                           Nama Produk
                         </label>
                         <input
+                          onChange={(event) =>
+                            setForm({ ...form, name: event.target.value })
+                          }
+                          required
                           type="text"
-                          name="produk"
-                          id="produk"
-                          autoComplete="produk"
+                          name="name"
+                          autoComplete="name"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -51,13 +89,16 @@ export default function TambahProdukPerusahaan() {
                   <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                     <div className="flex flex-row justify-end items-center space-x-2">
                       <button
-                        onClick={() => router.replace("/perusahaan/123/detail")}
+                        onClick={() =>
+                          router.replace(`/perusahaan/${paramsId}/detail`)
+                        }
                         type="button"
                         className="inline-flex justify-center rounded-md border border-transparent bg-slate-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                       >
                         Kembali
                       </button>
                       <button
+                        onClick={handleCreate}
                         type="button"
                         className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       >
@@ -75,4 +116,21 @@ export default function TambahProdukPerusahaan() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps({ req, params }) {
+  const { tk } = req.cookies;
+  if (!tk)
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+
+  return {
+    props: {
+      paramsId: params?.id,
+    },
+  };
 }

@@ -3,11 +3,12 @@ import React, { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
 
 const navigation = [
   { name: "Data Perusahaan", href: "/perusahaan", current: true },
 ];
-const userNavigation = [{ name: "Keluar", href: "/" }];
+const userNavigation = [{ name: "Keluar" }];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -15,6 +16,13 @@ function classNames(...classes) {
 
 const Navbar = () => {
   const router = useRouter();
+
+  const handleSignOut = () => {
+    Cookies.remove("tk");
+    localStorage.clear();
+    sessionStorage.clear();
+    router.replace("/");
+  };
 
   return (
     <Disclosure as="nav" className="bg-gray-800">
@@ -55,7 +63,7 @@ const Navbar = () => {
                   <button
                     type="button"
                     className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                    onClick={() => router.replace("/")}
+                    onClick={handleSignOut}
                   >
                     <span className="sr-only">View notifications</span>
                     <svg
@@ -94,15 +102,16 @@ const Navbar = () => {
                         {userNavigation.map((item) => (
                           <Menu.Item key={item.name}>
                             {({ active }) => (
-                              <a
-                                href={item.href}
+                              <button
+                                type="button"
+                                onClick={handleSignOut}
                                 className={classNames(
                                   active ? "bg-gray-100" : "",
                                   "block px-4 py-2 text-sm text-gray-700"
                                 )}
                               >
                                 {item.name}
-                              </a>
+                              </button>
                             )}
                           </Menu.Item>
                         ))}
@@ -149,8 +158,8 @@ const Navbar = () => {
                 {userNavigation.map((item) => (
                   <Disclosure.Button
                     key={item.name}
-                    as="a"
-                    href={item.href}
+                    as="button"
+                    onClick={handleSignOut}
                     className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                   >
                     <svg

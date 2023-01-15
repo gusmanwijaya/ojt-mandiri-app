@@ -1,12 +1,66 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../components/Navbar";
 import Header from "../../components/Header";
 import Content from "../../components/Content";
 import Footer from "../../components/Footer";
+import Swal from "sweetalert2";
+import { create } from "../../services/perusahaan";
 
 export default function TambahPerusahaan() {
   const router = useRouter();
+
+  const [form, setForm] = useState({
+    type: "",
+    name: "",
+    email: "",
+    website: "",
+    address: "",
+    telephone: "",
+    location: "",
+    isRegistered: "Belum",
+    additionalInfo: "",
+  });
+
+  const handleCreate = async () => {
+    if (form?.type === "") {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Jenis usaha tidak boleh kosong.",
+      });
+    } else if (form?.name === "") {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Nama perusahaan tidak boleh kosong.",
+      });
+    } else if (form?.address === "") {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Alamat tidak boleh kosong.",
+      });
+    } else {
+      const response = await create(form);
+      if (response?.data?.statusCode === 201) {
+        router.replace("/perusahaan");
+        Swal.fire({
+          icon: "success",
+          title: "Sukses",
+          text: "Berhasil menambahkan data perusahaan.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text:
+            response?.data?.message ||
+            "Nampaknya terjadi kesalahan pada API, silahkan hubungi teknisi Anda.",
+        });
+      }
+    }
+  };
 
   return (
     <>
@@ -33,93 +87,111 @@ export default function TambahPerusahaan() {
                     <div className="grid grid-cols-6 gap-6">
                       <div className="col-span-6">
                         <label
-                          htmlFor="jenisUsaha"
+                          htmlFor="type"
                           className="block text-sm font-medium text-gray-700"
                         >
                           Jenis Usaha
                         </label>
                         <input
                           type="text"
-                          name="jenisUsaha"
-                          id="jenisUsaha"
-                          autoComplete="jenisUsaha"
+                          name="type"
+                          autoComplete="type"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          required
+                          onChange={(event) =>
+                            setForm({ ...form, type: event.target.value })
+                          }
                         />
                       </div>
 
                       <div className="col-span-6">
                         <label
-                          htmlFor="namaPerusahaan"
+                          htmlFor="name"
                           className="block text-sm font-medium text-gray-700"
                         >
                           Nama Perusahaan
                         </label>
                         <input
                           type="text"
-                          name="namaPerusahaan"
-                          id="namaPerusahaan"
-                          autoComplete="namaPerusahaan"
+                          name="name"
+                          autoComplete="name"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          required
+                          onChange={(event) =>
+                            setForm({ ...form, name: event.target.value })
+                          }
                         />
                       </div>
 
                       <div className="col-span-6">
                         <label
-                          htmlFor="alamat"
+                          htmlFor="address"
                           className="block text-sm font-medium text-gray-700"
                         >
                           Alamat
                         </label>
                         <textarea
-                          name="alamat"
-                          id="alamat"
+                          name="address"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          required
+                          onChange={(event) =>
+                            setForm({ ...form, address: event.target.value })
+                          }
                         ></textarea>
                       </div>
 
                       <div className="col-span-6">
                         <label
-                          htmlFor="noTelepon"
+                          htmlFor="telephone"
                           className="block text-sm font-medium text-gray-700"
                         >
                           No Telepon
                         </label>
                         <input
                           type="tel"
-                          name="noTelepon"
-                          id="noTelepon"
-                          autoComplete="noTelepon"
+                          name="telephone"
+                          autoComplete="telephone"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={(event) =>
+                            setForm({ ...form, telephone: event.target.value })
+                          }
                         />
                       </div>
 
                       <div className="col-span-6">
                         <label
-                          htmlFor="lokasi"
+                          htmlFor="location"
                           className="block text-sm font-medium text-gray-700"
                         >
                           Lokasi
                         </label>
                         <input
                           type="text"
-                          name="lokasi"
-                          id="lokasi"
-                          autoComplete="lokasi"
+                          name="location"
+                          autoComplete="location"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={(event) =>
+                            setForm({ ...form, location: event.target.value })
+                          }
                         />
                       </div>
 
                       <div className="col-span-6">
                         <label
-                          htmlFor="terdaftar"
+                          htmlFor="isRegistered"
                           className="block text-sm font-medium text-gray-700"
                         >
                           Terdaftar
                         </label>
                         <select
-                          name="terdaftar"
-                          id="terdaftar"
+                          name="isRegistered"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={(event) =>
+                            setForm({
+                              ...form,
+                              isRegistered: event.target.value,
+                            })
+                          }
                         >
                           <option value=""></option>
                           <option value="Sudah">Sudah</option>
@@ -129,15 +201,20 @@ export default function TambahPerusahaan() {
 
                       <div className="col-span-6">
                         <label
-                          htmlFor="keterangan"
+                          htmlFor="additionalInfo"
                           className="block text-sm font-medium text-gray-700"
                         >
                           Keterangan
                         </label>
                         <textarea
-                          name="keterangan"
-                          id="keterangan"
+                          name="additionalInfo"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={(event) =>
+                            setForm({
+                              ...form,
+                              additionalInfo: event.target.value,
+                            })
+                          }
                         ></textarea>
                       </div>
                     </div>
@@ -152,6 +229,7 @@ export default function TambahPerusahaan() {
                         Kembali
                       </button>
                       <button
+                        onClick={handleCreate}
                         type="button"
                         className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       >
@@ -169,4 +247,19 @@ export default function TambahPerusahaan() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps({ req }) {
+  const { tk } = req.cookies;
+  if (!tk)
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+
+  return {
+    props: {},
+  };
 }

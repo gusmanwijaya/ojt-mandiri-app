@@ -1,10 +1,41 @@
 /* eslint-disable @next/next/no-img-element */
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Swal from "sweetalert2";
+import Cookies from "js-cookie";
+import { signIn } from "../services/authentication";
 
 export default function Home() {
   const router = useRouter();
+
+  const [form, setForm] = useState({
+    username: "",
+    password: "",
+  });
+
+  const handleSignIn = async () => {
+    if (form?.username !== "" && form?.password !== "") {
+      const response = await signIn(form);
+      if (response?.data?.statusCode === 200) {
+        Cookies.set("tk", response?.data?.data?.token);
+        router.replace("/perusahaan");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Kredensial tidak valid.",
+        });
+      }
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Silahkan isi username dan password Anda.",
+      });
+    }
+  };
 
   return (
     <>
@@ -26,7 +57,9 @@ export default function Home() {
                     Username
                   </label>
                   <input
-                    id="username"
+                    onChange={(event) =>
+                      setForm({ ...form, username: event.target.value })
+                    }
                     name="username"
                     type="text"
                     autoComplete="username"
@@ -40,7 +73,9 @@ export default function Home() {
                     Password
                   </label>
                   <input
-                    id="password"
+                    onChange={(event) =>
+                      setForm({ ...form, password: event.target.value })
+                    }
                     name="password"
                     type="password"
                     autoComplete="current-password"
@@ -53,7 +88,7 @@ export default function Home() {
 
               <div>
                 <button
-                  onClick={() => router.replace("/perusahaan")}
+                  onClick={handleSignIn}
                   type="button"
                   className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
@@ -67,4 +102,19 @@ export default function Home() {
       <Footer />
     </>
   );
+}
+
+export async function getServerSideProps({ req }) {
+  const { tk } = req.cookies;
+  if (tk)
+    return {
+      redirect: {
+        destination: "/perusahaan",
+        permanent: false,
+      },
+    };
+
+  return {
+    props: {},
+  };
 }

@@ -1,14 +1,27 @@
 import React from "react";
 
-const Pagination = () => {
+const Pagination = ({
+  page,
+  totalPage,
+  handlePrevious,
+  handleNext,
+  disabledPrevious,
+  disabledNext,
+}) => {
   return (
     <div className="flex flex-col items-center mt-4">
       <span className="text-sm text-gray-700">
-        Halaman <span className="font-semibold text-gray-900">1</span> dari{" "}
-        <span className="font-semibold text-gray-900">4</span> Halaman
+        Halaman <span className="font-semibold text-gray-900">{page}</span> dari{" "}
+        <span className="font-semibold text-gray-900">{totalPage}</span> Halaman
       </span>
       <div className="inline-flex mt-2 xs:mt-0">
-        <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900">
+        <button
+          onClick={handlePrevious}
+          disabled={disabledPrevious}
+          className={`inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 ${
+            disabledPrevious && "cursor-not-allowed"
+          }`}
+        >
           <svg
             aria-hidden="true"
             className="w-5 h-5 mr-2"
@@ -24,7 +37,13 @@ const Pagination = () => {
           </svg>
           Sebelumnya
         </button>
-        <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900">
+        <button
+          onClick={handleNext}
+          disabled={disabledNext}
+          className={`inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 ${
+            disabledNext && "cursor-not-allowed"
+          }`}
+        >
           Selanjutnya
           <svg
             aria-hidden="true"
