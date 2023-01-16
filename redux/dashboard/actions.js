@@ -2,7 +2,7 @@ import { ERROR_DASHBOARD, GET_ALL_DASHBOARD } from "./types";
 import { get } from "../../services/dashboard";
 import debounce from "debounce-promise";
 
-const debouncedGet = debounce(get, 1000);
+const debouncedGet = debounce(get, 250);
 
 const setGet = (registered, notRegistered) => {
   return {

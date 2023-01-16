@@ -75,6 +75,7 @@ const DetailPerusahaan = ({ oneData, paramsId }) => {
       name: "ID",
       selector: (row) => row.id,
       sortable: true,
+      width: "5rem",
     },
     {
       name: "Produk",
@@ -221,29 +222,33 @@ const DetailPerusahaan = ({ oneData, paramsId }) => {
               <p>Kembali</p>
             </div>
           </button>
-          <button
-            onClick={() => router.push(`/perusahaan/${paramsId}/tambah-produk`)}
-            type="button"
-            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm p-2 my-6 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          >
-            <div className="flex flex-row justify-center items-center space-x-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
-              <p>Tambah Produk</p>
-            </div>
-          </button>
+          {oneData?.isRegistered === "Sudah" && (
+            <button
+              onClick={() =>
+                router.push(`/perusahaan/${paramsId}/tambah-produk`)
+              }
+              type="button"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm p-2 my-6 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >
+              <div className="flex flex-row justify-center items-center space-x-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+                <p>Tambah Produk</p>
+              </div>
+            </button>
+          )}
         </div>
 
         <div className="py-4 shadow-xl rounded">

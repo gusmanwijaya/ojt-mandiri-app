@@ -27,3 +27,8 @@ export async function destroy(id) {
   const url = `${ROOT_API}/${API}/companies/destroy/${id}`;
   return CallApi({ url, method: "DELETE", token: true });
 }
+
+export async function impor(data) {
+  const url = `${ROOT_API}/${API}/companies/import`;
+  return CallApi({ url, method: "POST", token: true, data });
+}

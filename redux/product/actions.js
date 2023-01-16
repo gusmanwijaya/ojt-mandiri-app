@@ -2,7 +2,7 @@ import { ERROR_PRODUCT, GET_ALL_PRODUCT, SET_NAME, SET_PAGE } from "./types";
 import { get } from "../../services/product";
 import debounce from "debounce-promise";
 
-const debouncedGet = debounce(get, 1000);
+const debouncedGet = debounce(get, 250);
 
 const setName = (name) => {
   return {

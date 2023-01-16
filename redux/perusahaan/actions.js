@@ -7,7 +7,7 @@ import {
 import { get } from "../../services/perusahaan";
 import debounce from "debounce-promise";
 
-const debouncedGet = debounce(get, 1000);
+const debouncedGet = debounce(get, 250);
 
 const setSearch = (search) => {
   return {
