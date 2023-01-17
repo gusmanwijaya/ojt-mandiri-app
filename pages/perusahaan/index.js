@@ -19,6 +19,9 @@ import { fetchDashboard } from "../../redux/dashboard/actions";
 import { destroy } from "../../services/perusahaan";
 
 export default function Perusahaan() {
+  const ROOT_API = process.env.NEXT_PUBLIC_API;
+  const API = "api/v1";
+
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -248,8 +251,8 @@ export default function Perusahaan() {
             </div>
           )}
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex flex-row items-center space-x-2">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+              <div className="grid grid-cols-2 gap-4 md:gap-0 md:flex md:flex-row md:items-center md:space-x-2">
                 <button
                   onClick={() => router.push("/perusahaan/tambah")}
                   type="button"
@@ -274,6 +277,33 @@ export default function Perusahaan() {
                   </div>
                 </button>
 
+                <a
+                  href={`${ROOT_API}/${API}/companies/download`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  type="button"
+                  className="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm p-2 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800"
+                >
+                  <div className="flex flex-row justify-center items-center space-x-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                      />
+                    </svg>
+
+                    <p>Unduh Template</p>
+                  </div>
+                </a>
+
                 <button
                   onClick={() => router.push("/perusahaan/import")}
                   type="button"
@@ -295,6 +325,31 @@ export default function Perusahaan() {
                       />
                     </svg>
                     <p>Import</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => router.replace("/perusahaan/scrap")}
+                  type="button"
+                  className="text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:ring-violet-300 font-medium rounded-lg text-sm p-2 dark:bg-violet-600 dark:hover:bg-violet-700 focus:outline-none dark:focus:ring-violet-800"
+                >
+                  <div className="flex flex-row justify-center items-center space-x-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
+                      />
+                    </svg>
+
+                    <p>Scrap</p>
                   </div>
                 </button>
 
@@ -327,7 +382,7 @@ export default function Perusahaan() {
               <label htmlFor="simple-search" className="sr-only">
                 Search
               </label>
-              <div className="relative w-1/2 md:w-1/4">
+              <div className="relative w-full md:w-1/4 mt-4 md:mt-0">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg
                     aria-hidden="true"

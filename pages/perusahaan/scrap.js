@@ -1,32 +1,39 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import Navbar from "../../../components/Navbar";
-import Header from "../../../components/Header";
-import Content from "../../../components/Content";
-import Footer from "../../../components/Footer";
+import Navbar from "../../components/Navbar";
+import Header from "../../components/Header";
+import Content from "../../components/Content";
+import Footer from "../../components/Footer";
 import Swal from "sweetalert2";
-import { create } from "../../../services/product";
+import { scrap } from "../../services/perusahaan";
 
-export default function TambahProdukPerusahaan({ paramsId }) {
+export default function Scrap() {
   const router = useRouter();
 
   const [disabledButton, setDisabledButton] = useState(false);
 
   const [form, setForm] = useState({
-    name: "",
-    companyId: paramsId,
+    q: "",
+    max: 25,
   });
 
-  const handleCreate = async () => {
+  const handleScrap = async () => {
     setDisabledButton(true);
-    if (form?.name !== "") {
-      const response = await create(paramsId, form);
-      if (response?.data?.statusCode === 201) {
-        router.replace(`/perusahaan/${paramsId}/detail`);
+    if (form?.q === "") {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Tipe perusahaan tidak boleh kosong.",
+      });
+      setDisabledButton(false);
+    } else {
+      const response = await scrap(form?.q, form?.max);
+      if (response?.data?.statusCode === 200) {
+        router.replace("/perusahaan");
         Swal.fire({
           icon: "success",
           title: "Sukses",
-          text: "Berhasil menambahkan data produk.",
+          text: "Berhasil melakukan scrapping data perusahaan.",
         });
       } else {
         Swal.fire({
@@ -38,13 +45,6 @@ export default function TambahProdukPerusahaan({ paramsId }) {
         });
         setDisabledButton(false);
       }
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Nama produk tidak boleh kosong.",
-      });
-      setDisabledButton(false);
     }
   };
 
@@ -60,10 +60,11 @@ export default function TambahProdukPerusahaan({ paramsId }) {
               <div className="md:col-span-1">
                 <div className="px-4 sm:px-0">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">
-                    Tambah Data Produk
+                    Scrapping Data
                   </h3>
                   <p className="mt-1 text-sm text-gray-600">
-                    Silahkan lengkapi form yang tersedia.
+                    Pengambilan data dari google maps menggunakan outscraper
+                    dengan biaya $0.002 per satu kali scrapping.
                   </p>
                 </div>
               </div>
@@ -73,19 +74,39 @@ export default function TambahProdukPerusahaan({ paramsId }) {
                     <div className="grid grid-cols-6 gap-6">
                       <div className="col-span-6">
                         <label
-                          htmlFor="name"
+                          htmlFor="q"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Nama Produk
+                          Tipe Perusahaan
                         </label>
                         <input
                           onChange={(event) =>
-                            setForm({ ...form, name: event.target.value })
+                            setForm({ ...form, q: event.target.value })
                           }
                           required
                           type="text"
-                          name="name"
-                          autoComplete="name"
+                          name="q"
+                          autoComplete="q"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+
+                      <div className="col-span-6">
+                        <label
+                          htmlFor="max"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Limit Data
+                        </label>
+                        <input
+                          onChange={(event) =>
+                            setForm({ ...form, max: event.target.value })
+                          }
+                          required
+                          type="number"
+                          name="max"
+                          min={1}
+                          autoComplete="max"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -95,9 +116,7 @@ export default function TambahProdukPerusahaan({ paramsId }) {
                     <div className="flex flex-row justify-end items-center space-x-2">
                       <button
                         disabled={disabledButton}
-                        onClick={() =>
-                          router.replace(`/perusahaan/${paramsId}/detail`)
-                        }
+                        onClick={() => router.replace(`/perusahaan`)}
                         type="button"
                         className={`inline-flex justify-center rounded-md border border-transparent bg-slate-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 ${
                           disabledButton && "cursor-not-allowed"
@@ -105,11 +124,12 @@ export default function TambahProdukPerusahaan({ paramsId }) {
                       >
                         Kembali
                       </button>
+
                       <button
                         disabled={disabledButton}
-                        onClick={handleCreate}
+                        onClick={handleScrap}
                         type="button"
-                        className={`inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                        className={`inline-flex justify-center rounded-md border border-transparent bg-violet-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 ${
                           disabledButton && "cursor-not-allowed"
                         }`}
                       >
@@ -135,7 +155,7 @@ export default function TambahProdukPerusahaan({ paramsId }) {
                             Loading...
                           </>
                         ) : (
-                          "Tambah"
+                          "Scrap"
                         )}
                       </button>
                     </div>
@@ -152,7 +172,7 @@ export default function TambahProdukPerusahaan({ paramsId }) {
   );
 }
 
-export async function getServerSideProps({ req, params }) {
+export async function getServerSideProps({ req }) {
   const { tk } = req.cookies;
   if (!tk)
     return {
@@ -163,8 +183,6 @@ export async function getServerSideProps({ req, params }) {
     };
 
   return {
-    props: {
-      paramsId: params?.id,
-    },
+    props: {},
   };
 }

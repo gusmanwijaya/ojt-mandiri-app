@@ -32,3 +32,8 @@ export async function impor(data) {
   const url = `${ROOT_API}/${API}/companies/import`;
   return CallApi({ url, method: "POST", token: true, data });
 }
+
+export async function scrap(q, max) {
+  const url = `${ROOT_API}/${API}/companies/outscraper?q=${q}&max=${max}`;
+  return CallApi({ url, method: "GET", token: true });
+}
