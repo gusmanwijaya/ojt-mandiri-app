@@ -206,50 +206,48 @@ export default function Perusahaan() {
       <div className="bg-gray-100 h-full">
         <Navbar />
         <Content>
-          {allData?.length > 0 && (
-            <div className="flex flex-col items-center justify-center mb-6">
-              <h3 className="text-base font-bold mb-4">
-                Persentase Perusahaan Yang Terdaftar
-              </h3>
-              <div className="w-1/2 h-1/2 md:w-1/6 md:h-1/6">
-                <PieChart
-                  data={[
-                    {
-                      title: "Terdaftar",
-                      value: registered,
-                      color: "#4BB543",
-                    },
-                    {
-                      title: "Belum Terdaftar",
-                      value: notRegistered,
-                      color: "#E50914",
-                    },
-                  ]}
-                  label={(data) => `${Math.round(data.dataEntry.percentage)} %`}
-                  animate
-                  animationDuration={500}
-                  animationEasing="ease-out"
-                  center={[50, 50]}
-                  labelPosition={50}
-                  labelStyle={{
-                    fontSize: "8px",
-                    fontFamily: "sans-serif",
-                    fill: "white",
-                  }}
-                  lengthAngle={360}
-                  paddingAngle={0}
-                  radius={50}
-                  startAngle={0}
-                />
-              </div>
-              <div className="my-4 text-center">
-                <p className="text-[#4BB543]">Total Terdaftar : {registered}</p>
-                <p className="text-[#E50914]">
-                  Total Belum Terdaftar : {notRegistered}
-                </p>
-              </div>
+          <div className="flex flex-col items-center justify-center mb-6">
+            <h3 className="text-base font-bold mb-4">
+              Persentase Perusahaan Yang Terdaftar
+            </h3>
+            <div className="w-1/2 h-1/2 md:w-1/6 md:h-1/6">
+              <PieChart
+                data={[
+                  {
+                    title: "Terdaftar",
+                    value: registered,
+                    color: "#4BB543",
+                  },
+                  {
+                    title: "Belum Terdaftar",
+                    value: notRegistered,
+                    color: "#E50914",
+                  },
+                ]}
+                label={(data) => `${Math.round(data.dataEntry.percentage)} %`}
+                animate
+                animationDuration={500}
+                animationEasing="ease-out"
+                center={[50, 50]}
+                labelPosition={50}
+                labelStyle={{
+                  fontSize: "8px",
+                  fontFamily: "sans-serif",
+                  fill: "white",
+                }}
+                lengthAngle={360}
+                paddingAngle={0}
+                radius={50}
+                startAngle={0}
+              />
             </div>
-          )}
+            <div className="my-4 text-center">
+              <p className="text-[#4BB543]">Total Terdaftar : {registered}</p>
+              <p className="text-[#E50914]">
+                Total Belum Terdaftar : {notRegistered}
+              </p>
+            </div>
+          </div>
           <div>
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
               <div className="grid grid-cols-2 gap-4 md:gap-0 md:flex md:flex-row md:items-center md:space-x-2">
