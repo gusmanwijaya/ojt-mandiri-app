@@ -86,8 +86,8 @@ export default function Perusahaan() {
 
   const columns = [
     {
-      name: "ID",
-      selector: (row) => row.id,
+      name: "No",
+      selector: (row) => row.no,
       sortable: true,
       width: "5rem",
     },
@@ -120,8 +120,8 @@ export default function Perusahaan() {
 
   const data =
     allData?.length > 0
-      ? allData?.map((value) => ({
-          id: value?.id,
+      ? allData?.map((value, index) => ({
+          no: index + 1,
           type: value?.type,
           name: value?.name,
           location: value?.location ? (

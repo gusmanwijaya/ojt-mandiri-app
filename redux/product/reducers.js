@@ -1,7 +1,6 @@
-import { GET_ALL_PRODUCT, SET_NAME, SET_PAGE, ERROR_PRODUCT } from "./types";
+import { GET_ALL_PRODUCT, SET_PAGE, ERROR_PRODUCT } from "./types";
 
 const initialState = {
-  name: "",
   page: 1,
   limit: 25,
   totalPage: 1,
@@ -22,12 +21,6 @@ const reducers = (state = initialState, action) => {
       return {
         ...state,
         error: action.error,
-      };
-
-    case SET_NAME:
-      return {
-        ...state,
-        name: action.name,
       };
 
     case SET_PAGE:

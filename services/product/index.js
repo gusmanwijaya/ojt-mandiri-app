@@ -3,8 +3,8 @@ import CallApi from "../../configs/api";
 const ROOT_API = process.env.NEXT_PUBLIC_API;
 const API = "api/v1";
 
-export async function get(id, page, limit, name) {
-  const url = `${ROOT_API}/${API}/products/${id}/get?name=${name}&page=${page}&limit=${limit}`;
+export async function get(id, page, limit) {
+  const url = `${ROOT_API}/${API}/products/${id}/get?page=${page}&limit=${limit}`;
   return CallApi({ url, method: "GET", token: true });
 }
 

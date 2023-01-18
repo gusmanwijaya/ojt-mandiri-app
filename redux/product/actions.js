@@ -1,15 +1,8 @@
-import { ERROR_PRODUCT, GET_ALL_PRODUCT, SET_NAME, SET_PAGE } from "./types";
+import { ERROR_PRODUCT, GET_ALL_PRODUCT, SET_PAGE } from "./types";
 import { get } from "../../services/product";
 import debounce from "debounce-promise";
 
 const debouncedGet = debounce(get, 250);
-
-const setName = (name) => {
-  return {
-    type: SET_NAME,
-    name,
-  };
-};
 
 const setPage = (page) => {
   return {
@@ -38,15 +31,9 @@ const fetchProduct = (id) => {
     const params = {
       page: getState().productReducers?.page || 1,
       limit: getState().productReducers?.limit || 25,
-      name: getState().productReducers?.name || "",
     };
 
-    const response = await debouncedGet(
-      id,
-      params?.page,
-      params?.limit,
-      params?.name
-    );
+    const response = await debouncedGet(id, params?.page, params?.limit);
     if (response?.data?.statusCode === 200) {
       dispatch(setGet(response?.data?.data, response?.data?.totalPage));
     } else {
@@ -55,4 +42,4 @@ const fetchProduct = (id) => {
   };
 };
 
-export { fetchProduct, setName, setPage };
+export { fetchProduct, setPage };
