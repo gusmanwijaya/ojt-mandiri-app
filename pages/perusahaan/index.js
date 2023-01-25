@@ -16,7 +16,7 @@ import {
   setSearch,
 } from "../../redux/perusahaan/actions";
 import { fetchDashboard } from "../../redux/dashboard/actions";
-import { destroy } from "../../services/perusahaan";
+import { destroy, truncate } from "../../services/perusahaan";
 
 export default function Perusahaan() {
   const ROOT_API = process.env.NEXT_PUBLIC_API;
@@ -84,11 +84,46 @@ export default function Perusahaan() {
     });
   };
 
+  const onTruncate = () => {
+    Swal.fire({
+      title: "Hapus semua data?",
+      text: "Data yang telah dihapus tidak dapat dikembalikan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#E50914",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Hapus",
+      cancelButtonText: "Batal",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const response = await truncate();
+        if (response?.data?.statusCode === 200) {
+          Swal.fire({
+            icon: "success",
+            title: "Sukses",
+            text: "Berhasil menghapus semua data perusahaan.",
+          });
+          dispatch(fetchPerusahaan());
+          dispatch(fetchDashboard());
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `${
+              response?.data?.message ||
+              "Nampaknya terjadi kesalahan pada API, silahkan hubungi teknisi Anda."
+            }`,
+          });
+        }
+      }
+    });
+  };
+
   const columns = [
     {
       name: "No",
       selector: (row) => row.no,
-      sortable: true,
+      sortable: false,
       width: "5rem",
     },
     {
@@ -373,6 +408,31 @@ export default function Perusahaan() {
                     </svg>
 
                     <p>Refresh</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={onTruncate}
+                  type="button"
+                  className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm p-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800"
+                >
+                  <div className="flex flex-row justify-center items-center space-x-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                      />
+                    </svg>
+
+                    <p>Hapus Semua</p>
                   </div>
                 </button>
               </div>

@@ -37,3 +37,8 @@ export async function scrap(q, max) {
   const url = `${ROOT_API}/${API}/companies/outscraper?q=${q}&max=${max}`;
   return CallApi({ url, method: "GET", token: true });
 }
+
+export async function truncate() {
+  const url = `${ROOT_API}/${API}/companies/truncate`;
+  return CallApi({ url, method: "DELETE", token: true });
+}
